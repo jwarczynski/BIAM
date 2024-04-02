@@ -1,0 +1,133 @@
+%@descr: A template for a paper, a report or a thesis - suitable for modifications
+%@author: Maciej Komosiński
+
+\documentclass{article} 
+\usepackage[english]{babel} 
+\usepackage[utf8]{inputenc} 
+\usepackage[OT4]{fontenc}
+\usepackage{graphicx,color} %include pdf's (and png's for raster graphics... avoid raster graphics!)
+\usepackage{amsmath} %just for \eqref
+\usepackage{url}
+\usepackage{subcaption} % or \usepackage{subfigure}
+\usepackage{float} % for [H] placement specifier
+\usepackage{multicol}
+\usepackage[pdftex,hyperfootnotes=false,pdfborder={0 0 0}]{hyperref} % after all packages; pdfborder not implemented the same way for every implementation because the specification is imprecise; under miktex you just don't see the frames
+
+
+\input{_settings}
+
+%\title{Lab report:\\Biologically-inspired algorithms and models}
+%\author{}
+%\date{}
+
+
+\begin{document}
+\input{_title}
+
+\section{Problem description}\label{sec:problem-description}
+The Quadratic Assignment Problem (QAP) is a combinatorial optimization problem focused on assigning a set of facilities to a set of locations
+in a way that minimizes the total cost.
+Each facility has an associated flow and each pair of facilities has an associated distance or cost.
+The objective is to minimize the sum of the products of the flows and distances, considering the assignment of facilities to locations.
+
+Applications of QAP span various fields including logistics, telecommunications, computer science, and facility layout planning.
+In logistics, it's used for warehouse organization and facility allocation.
+In telecommunications, it aids in network optimization.
+In computer science, it's applied to circuit design and compiler optimizations.
+QAP also finds relevance in operations research for optimal facility placement.
+
+Interpretations of QAP can range from arranging physical facilities to minimize transportation costs to organizing data to reduce access time.
+Its complexity is significant, classified as NP-hard, making it challenging to solve for large instances.
+
+\subsection{Problem formulation}\label{subsec:problem-formulation}
+The Quadratic Assignment Problem can be formulated as follows:
+Given $n$ facilities and $n$ locations, where $n$ is the number of facilities and locations,
+the goal is to find a permutation $\pi$ of the facilities that minimizes the total cost.
+The total cost is calculated as the sum of the products of the flows and distances for all pairs of facilities.
+The cost function is defined as:
+\[ f(\pi) = \sum_{i=1}^{n} \sum_{j=1}^{n} a_{ij} \cdot b_{\pi(i)\pi(j)} \]
+where $a_{ij}$ is the flow between facilities $i$ and $j$, $b_{\pi(i)\pi(j)}$ is the distance between the locations assigned to facilities $i$ and $j$,
+and $\pi$ is a permutation of the facilities.
+
+The goal is to find the permutation $\pi$ that minimizes the total cost $f(\pi)$.
+
+\subsection{Instance description}\label{subsec:instance-description}
+The instances used in this study are taken from the QAPLIB library, a collection of QAP instances used for benchmarking algorithms.
+The instances used in this study are:
+\begin{itemize}
+    \item \textit{chr12a}: A 12-facility instance with known optimal solution.
+    \item \textit{chr15a}: A 15-facility instance with known optimal solution.
+    \item \textit{chr18a}: An 18-facility instance with known optimal solution.
+    \item \textit{chr20a}: A 20-facility instance with known optimal solution.
+    \item \textit{chr22a}: A 22-facility instance with known optimal solution.
+    \item \textit{chr25a}: A 25-facility instance with known optimal solution.
+    \item \textit{lipa20a}: A 20-facility instance with known optimal solution.
+    \item \textit{tai12b}: A 12-facility instance with known optimal solution.
+    \item \textit{tai100b}: A 100-facility instance with known optimal solution.
+\end{itemize}
+
+The selection of instances from the \textit{chr} group was based on their progressive difficulty levels,
+allowing for a comprehensive evaluation spanning from relatively easier to more challenging problem instances.
+Additionally, the inclusion of the \textit{lipa20a} instance, despite its similar size to the \textit{chr} instances,
+was motivated by its distinct characteristics, providing a different set of challenges for algorithm evaluation.
+While generally less demanding than the \textit{chr} instances, it offers valuable insights into algorithm performance across diverse problem landscapes.
+Furthermore, the inclusion of the \textit{tai} instances was aimed at testing the algorithms across a wider spectrum of problem sizes.
+
+
+\section{Implementation}\label{sec:implementation}
+The Quadratic Assignment Problem was solved using five algorithms:
+\begin{itemize}
+    \item \textbf{Heuristic (H):} The Heuristic algorithm operates by analyzing the sums of rows in matrices $a$ and $b$, representing flows and distances.
+        It iteratively identifies the facility with the highest sum in matrix $a$ and assigns it to the location with the lowest sum in matrix $b$.
+        This process continues until a solution is reached.
+    \item \textbf{Steepest (S):} A local search algorithm that iteratively explores the neighborhood of the current solution and selects the best neighbor.
+        It also allows for some number of subsequent non-improving moves before terminating.
+    \item \textbf{Greedy (G):} A local search algorithm that iteratively explores the neighborhood of the current solution and selects the first improving neighbor.
+        It terminates when no improvement is possible.
+    \item \textbf{Random Walk (RW):} An algorithm that in each step selects a random neighbor and track the best solution encountered.
+    \item \textbf{Random Search (RS):} A random search algorithm that in each step generates random permutations of the facilities and selects the best solution encountered.
+\end{itemize}
+
+Implemenatation of these algorithms was done in Rust programming language.
+
+
+\section{Description of the neighborhood operators}\label{sec:description-of-the-neighborhood-operators}
+For the neighborhood operator ``Swap'' operator was used.
+In this operator, two elements within a permutation representing the assignment of facilities to locations are selected,
+and their positions are swapped.
+This operation effectively generates a neighboring solution by altering the assignment of two facilities to different locations,
+potentially leading to a decrease in the total cost.
+The neighborhood size of the ``Swap'' operator corresponds to the number of possible swaps that can be performed within a given permutation.
+For a permutation of length $n$, there are $\frac{n \times (n-1)}{2}$ possible swaps, as each pair of elements can be swapped,
+and redundant swaps (swapping an element with itself or swapping two elements back to their original positions) are excluded.
+
+
+\section{Algorithms Performance Comparison}\label{sec:algorithms-performance-comparison}
+\input{algorithms-performance-comparison}
+
+\section{Conclusions}\label{sec:conclusions}
+The Quadratic Assignment Problem (QAP) poses a significant challenge in combinatorial optimization, finding applications across diverse fields.
+This study evaluated the performance of five algorithms - Heuristic, Steepest, Greedy, Random Walk, and Random Search - on a range of QAP instances.
+The results demonstrate that the Greedy and Steepest algorithms consistently outperform the Random Walk and Random Search algorithms in terms of solution quality.
+Although the Heuristic algorithm yields suboptimal solutions,
+its advantage lies in its speed, making it suitable for less challenging instances prioritizing efficiency.
+Both the Greedy and Steepest algorithms emerge as top performers in solution quality.
+However, the choice between them should consider specific problem requirements, as the difference in performance is not substantial.
+Conversely, the Random Walk and Random Search algorithms deliver poor results, with solution quality deteriorating as instance difficulty increases.
+Variations in the number of algorithmic steps and evaluated solutions are observed among algorithms,
+with the Greedy algorithm conducting fewer evaluations compared to Steepest and Random Walk algorithms.
+Furthermore, for the Greedy and Steepest algorithms, the quality of the solution is found to be independent of the initial solution quality.
+The stability of average and lowest solution costs after a certain number of runs suggests the benefit of running the algorithm for at least 10 to 20 iterations.
+Regarding the relationship between solution quality and distance from the optimal solution,
+a negative correlation is observed for both instances tai12b and tai100b.
+This indicates that solution quality tends to decrease as the distance from the optimal solution increases.
+However, the lack of significance in the correlation implies that local minima are scattered throughout the decision space.
+
+In summary, while the Greedy and Steepest algorithms exhibit superior performance,
+careful consideration of algorithmic characteristics and problem requirements is essential for algorithm selection.
+Further research could explore algorithmic enhancements and strategies for addressing challenges posed by local minima.
+
+\section{Future Work}\label{sec:future-work}
+\input{future-work}
+
+\end{document}
